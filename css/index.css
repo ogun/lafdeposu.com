@@ -1,0 +1,25 @@
+[ng\:cloak],
+[ng-cloak],
+[data-ng-cloak],
+[x-ng-cloak],
+.ng-cloak,
+.x-ng-cloak {
+    display: none !important;
+}
+
+.table-detail td:first-child {
+    width: 140px;
+    font-weight: bold;
+}
+
+#filterAncContainer {
+    margin-top: 15px;
+}
+
+.j {
+    color: red;
+}
+
+.ads-content {
+    margin: 20px 0;
+}
