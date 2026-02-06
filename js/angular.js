@@ -72,7 +72,6 @@ findWordsApp.controller("wordListCtrl", ["$scope", "$sce", "FindWord", "Share", 
                     var regex = new RegExp(joker + "(?!<)", "");
                     word = word.replace(regex, "<span class=\"j\">" + joker + "</span>");
                 }
-                console.log(word);
                 $scope.wordList[i].words[j].w = $sce.trustAsHtml(word);
             }
         }
