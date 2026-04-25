@@ -2,7 +2,7 @@
 
 ## Overview
 
-`Laf Deposu` is a client‑side Turkish word‑finder SPA built with AngularJS 1.x, Bootstrap 3, jQuery 2.1, and **sql.js** (SQLite compiled to WebAssembly). All processing occurs in the browser; the static site is served via a simple HTTP server.
+`Laf Deposu` is a client-side Turkish word-finder SPA built with AngularJS 1.x, Bootstrap 3, jQuery 2.1, and **sql.js** (SQLite compiled to WebAssembly). All processing occurs in the browser; the static site is served via a simple HTTP server.
 
 ## Architecture snapshot (extracted from docs)
 
@@ -15,52 +15,60 @@
 
 | Agent | Role |
 |-------|------|
-| **code‑jerk** | Detect dead/over‑engineered code, duplicate logic, unused imports. |
-| **fast‑api‑developer** | Not directly applicable (no FastAPI), but used for bulk code clean‑up. |
+| **code-jerk** | Detect dead/over-engineered code, duplicate logic, unused imports. |
+| **fast-api-developer** | Not directly applicable (no FastAPI), but used for bulk code clean-up. |
+| **qa-developer** | Wrote and maintains test suite in `tests/`. |
 | **puppeteer** (via Node) | Automated UI testing – drives the web page, fills the search box, clicks buttons, verifies results. |
 
 ## How to test – ensure nothing is broken
 
 1. **Install dependencies** (run once):
    ```bash
-   npm install   # installs puppeteer (already in package.json)
-   # npm install -g playwright   # not needed after we switched to puppeteer
+   npm install
    ```
-2. **Serve the site** (any static‑file server works, e.g. Python’s built‑in server):
+   Installs puppeteer (for browser tests) and jest (test runner).
+
+2. **Serve the site** with Node:
    ```bash
-   python3 -m http.server 8080 &   # runs in background
+   node server.js &
    ```
-   The server PID is printed; you can stop it later with `kill <PID>`.
-3. **Run the automated test script** (`test_search.js` lives in the repo root):
+   Static server runs at `http://localhost:8080`. Kill later with `fuser -k 8080/tcp` or `kill <PID>`.
+
+3. **Run the test suite**:
    ```bash
-   node test_search.js
+   npm test
    ```
+   Executes `tests/search.test.js` – 10 tests across two suites:
+   - **UI Interaction Tests** – filter toggle, search URL updates, back button, list/column view results.
+   - **URL Creation Tests** – query string construction with filters, empty search, back button revert.
+
    Expected output:
    ```
-   List view RESULT: PASS
-   Column view RESULT: PASS
+   Suite: UI Interaction Tests
+     filter toggle should show and hide filters: PASS
+     ...
+   --- Summary ---
+   Total tests: 10
+   Passed: 10
+   Failed: 0
    ```
-   The script:
-   - Launches Chrome head‑less (`/usr/bin/google-chrome`).
-   - Types `kar` into `#srch-term`.
-   - Clicks `#srch-button`.
-   - Waits for result tables, extracts all words, and checks that both `ark` and `kar` appear.
-   - Repeats the check after switching to column view via the button `ng-click="changeListType(1)"`.
+
 4. **Manual verification (optional)**
    - Open `http://localhost:8080` in a browser.
    - Enter `kar` in the search field and press *Enter* or click the search button.
    - Verify that the results list contains both **ark** and **kar** in list view.
-   - Click the *column view* button (the one with `ng-click="changeListType(1)"`) and verify the same words appear.
+   - Click the *column view* button and verify the same words appear.
+
 5. **Cleanup**
-   - Stop the HTTP server: `kill <PID>` (replace `<PID>` with the number printed when you started the server).
-   - Remove any temporary files if needed.
+   - Stop the HTTP server: `fuser -k 8080/tcp`
 
 ## Common pitfalls
 
-- **Missing libraries** – keep `dist/jquery-2.1.1.min.js`, `dist/bootstrap.min.js`, and all Angular scripts referenced in `index.html`. The `code‑jerk` audit removed unused imports, but these three are required for UI interactions.
-- **Browser executable** – Puppeteer expects Chrome at `/usr/bin/google-chrome`. Adjust `executablePath` in `test_search.js` if Chrome is installed elsewhere.
+- **Missing libraries** – keep `dist/jquery-2.1.1.min.js`, `dist/bootstrap.min.js`, and all Angular scripts referenced in `index.html`.
+- **Browser executable** – Puppeteer expects Chrome at `/usr/bin/google-chrome`. Adjust `executablePath` in `tests/search.test.js` if Chrome is installed elsewhere.
+- **Server port** – tests expect `http://localhost:8080`. Ensure no other process occupies this port before starting `server.js`.
 - **Cache** – after code changes, do a hard refresh (Ctrl+F5) to avoid stale JS or DB files.
 
 ---
 
-*Generated in caveman mode (full) – concise, token‑efficient.*
+*Generated in caveman mode (full) – concise, token-efficient.*

@@ -1,5 +1,11 @@
 {
+  "scripts": {
+    "test": "node tests/search.test.js"
+  },
   "dependencies": {
     "puppeteer": "^24.42.0"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0"
   }
 }
