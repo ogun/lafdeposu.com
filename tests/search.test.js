@@ -67,6 +67,60 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // Suites and tests
 // ---------------------------------------------------------------------------
 
+describe('URL Querystring Tests', (it) => {
+  it('loads page with only search term querystring', async (page) => {
+    await page.goto('http://localhost:8080/?kar', { waitUntil: 'networkidle2' });
+    await page.waitForSelector('#srch-term');
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== 'kar') throw new Error(`Expected search term 'kar', got '${term}'`);
+    // No filters should be visible
+    const filtersHidden = await page.$eval('#filters', el => el.classList.contains('hidden'));
+    if (!filtersHidden) throw new Error('Filters panel should be hidden when no filter params');
+    // Results should show matching words
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    if (!words.includes('kar') && !words.includes('ark')) {
+      throw new Error(`Expected results to include 'kar' or 'ark', got ${JSON.stringify(words.slice(0,5))}`);
+    }
+  });
+
+  it('loads page with search term and startsWith filter', async (page) => {
+    await page.goto('http://localhost:8080/?kemal&startsWith=a', { waitUntil: 'networkidle2' });
+    await page.waitForSelector('#srch-term');
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== 'kemal') throw new Error(`Expected search term 'kemal', got '${term}'`);
+    const startsWith = await page.$eval('input[ng-model="startsWith"]', el => el.value);
+    if (startsWith !== 'a') throw new Error(`Expected startsWith filter 'a', got '${startsWith}'`);
+    // Filter panel should be visible
+    const filtersHidden = await page.$eval('#filters', el => el.classList.contains('hidden'));
+    if (filtersHidden) throw new Error('Filters panel should be visible when filter params present');
+    // Results should include words starting with 'a' among kemal results
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    if (!words.some(w => w.startsWith('a'))) {
+      throw new Error(`Expected at least one result starting with 'a', got ${JSON.stringify(words.slice(0,5))}`);
+    }
+  });
+
+  it('loads page with multiple filters and checks results', async (page) => {
+    await page.goto('http://localhost:8080/?kar&contains=a&endsWith=r', { waitUntil: 'networkidle2' });
+    await page.waitForSelector('#srch-term');
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== 'kar') throw new Error(`Expected search term 'kar', got '${term}'`);
+    const contains = await page.$eval('input[ng-model="contains"]', el => el.value);
+    if (contains !== 'a') throw new Error(`Expected contains filter 'a', got '${contains}'`);
+    const endsWith = await page.$eval('input[ng-model="endsWith"]', el => el.value);
+    if (endsWith !== 'r') throw new Error(`Expected endsWith filter 'r', got '${endsWith}'`);
+    const filtersHidden = await page.$eval('#filters', el => el.classList.contains('hidden'));
+    if (filtersHidden) throw new Error('Filters panel should be visible when filter params present');
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    if (!words.some(w => w.includes('a') && w.endsWith('r'))) {
+      throw new Error(`Expected results containing 'a' and ending with 'r', got ${JSON.stringify(words.slice(0,5))}`);
+    }
+  });
+});
+
 describe('UI Interaction Tests', (it) => {
   it('filter toggle should show and hide filters', async (page) => {
     const filtersBefore = await page.$eval('#filters', (el) => el.classList.contains('hidden'));

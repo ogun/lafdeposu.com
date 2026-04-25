@@ -83,6 +83,62 @@ findWordsApp.controller("wordListCtrl", ["$scope", "$sce", "FindWord", "Share", 
         $scope.share = Share.createLink($scope.chars, $scope.startsWith, $scope.contains, $scope.endsWith, $scope.resultCharCount);
     }
 
+    // Parse querystring on page load
+    var queryString = window.location.search.substring(1);
+    if (queryString) {
+        var params = queryString.split('&');
+        var hasFilterParams = false;
+
+        params.forEach(function (param) {
+            if (param.indexOf('=') === -1) {
+                // First param without '=' is the search term
+                $scope.chars = param;
+            } else {
+                // key=value pairs for filters
+                hasFilterParams = true;
+                var parts = param.split('=');
+                var key = parts[0];
+                var value = decodeURIComponent(parts[1]);
+
+                if (key === 'startsWith' || key === 'contains' || key === 'endsWith' || key === 'resultCharCount') {
+                    $scope[key] = value;
+                }
+            }
+        });
+
+        // Show filter panel if any filter params present
+        if (hasFilterParams) {
+            setTimeout(function () {
+                var filtersDiv = document.getElementById('filters');
+                if (filtersDiv) {
+                    filtersDiv.classList.remove('hidden');
+                }
+            }, 0);
+        }
+
+        // Trigger search if search term found
+        if ($scope.chars) {
+            // Ensure DB loaded before search
+            if (window.db) {
+                if (typeof $scope.$applyAsync === 'function') {
+                    $scope.$applyAsync($scope.findWordsClick);
+                } else {
+                    $scope.$apply($scope.findWordsClick);
+                }
+            } else {
+                // Wait for DB ready event
+                window.addEventListener('dbReady', function onDbReady() {
+                    window.removeEventListener('dbReady', onDbReady);
+                    if (typeof $scope.$applyAsync === 'function') {
+                        $scope.$applyAsync($scope.findWordsClick);
+                    } else {
+                        $scope.$apply($scope.findWordsClick);
+                    }
+                });
+            }
+        }
+    }
+
     // Kullanıcının tercihini kaydedelim
     $scope.changeListType = function (value) {
         $cookies.listType = value;

@@ -1,10 +1,15 @@
 
+window.dbReadyPromise = (async function() {
 const sqlPromise = initSqlJs({
     locateFile: file => `dist/${file}`
 });
 const dataPromise = fetch("data/dict.db").then(res => res.arrayBuffer());
 const [SQL, buf] = await Promise.all([sqlPromise, dataPromise])
 const db = new SQL.Database(new Uint8Array(buf));
+window.db = db; // expose db globally for angular controller
+window.dispatchEvent(new Event('dbReady'));
+return db;
+})();
 
 function listJokerChars(input, dbWord) {
     let result = dbWord;
