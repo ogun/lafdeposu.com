@@ -32,10 +32,14 @@ findWordsApp.factory("Share", function () {
             }
 
             if (filter != "") {
-                returnValue.queryString += "?" + filter.substring(1, filter.length);
+                returnValue.queryString += filter;
             }
         }
 
+        if (returnValue.queryString) {
+            const newUrl = window.location.pathname + '?' + returnValue.queryString;
+            window.history.pushState(null, '', newUrl);
+        }
         return returnValue;
     }
 
