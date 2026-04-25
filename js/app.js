@@ -78,7 +78,13 @@ function createCommandText(input, resultCharCount) {
 
     // If resultCharCount is undefined or null, apply this condition
     if (resultCharCount == null) {
-        commandText.push(`length <= ${inputLength} AND length > 2 ORDER BY length DESC, word`);
+        if (hasAsterix) {
+            // Wildcard present: allow any length up to input length, no lower bound
+            commandText.push(`length <= ${inputLength} ORDER BY length DESC, word`);
+        } else {
+            // No wildcard: enforce minimum length > 2
+            commandText.push(`length <= ${inputLength} AND length > 2 ORDER BY length DESC, word`);
+        }
     } else {
         commandText.push(`length = 2 ORDER BY length DESC, word`);
     }

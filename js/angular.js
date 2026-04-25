@@ -100,6 +100,12 @@ findWordsApp.controller("wordListCtrl", ["$scope", "$sce", "FindWord", "Share", 
                 hasFilterParams = true;
             }
         });
+        // Ensure Angular updates the view with the parsed keyword (e.g., '*')
+        if (typeof $scope.$applyAsync === 'function') {
+            $scope.$applyAsync();
+        } else if (typeof $scope.$apply === 'function') {
+            $scope.$apply();
+        }
 
         // Show filter panel if any filter params present
         if (hasFilterParams) {

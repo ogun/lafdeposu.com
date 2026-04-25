@@ -340,6 +340,66 @@ describe('Turkish Character Button Tests', (it) => {
 });
 
 // ---------------------------------------------------------------------------
+
+describe('Wildcard Character Tests', (it) => {
+  it('querystring with * loads correct search term', async (page) => {
+    await page.goto('http://localhost:8080/?keyword=k*r', { waitUntil: 'networkidle2' });
+    await page.waitForSelector('#srch-term');
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== 'k*r') throw new Error(`Expected search term 'k*r', got '${term}'`);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    const matches = words.filter(w => /^k.r$/.test(w));
+    if (matches.length === 0) throw new Error(`Expected results to include words matching 'k*r', got ${JSON.stringify(words.slice(0,5))}`);
+  });
+
+  it('querystring with multiple * characters', async (page) => {
+    await page.goto('http://localhost:8080/?keyword=**', { waitUntil: 'networkidle2' });
+    await page.waitForSelector('#srch-term');
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== '**') throw new Error(`Expected search term '**', got '${term}'`);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    const matches = words.filter(w => /^..$/.test(w));
+    if (matches.length === 0) throw new Error(`Expected 2-character words, got ${JSON.stringify(words.slice(0,5))}`);
+  });
+
+  it('querystring with * and filters', async (page) => {
+    await page.goto('http://localhost:8080/?keyword=k*r&startsWith=k', { waitUntil: 'networkidle2' });
+    await page.waitForSelector('#srch-term');
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== 'k*r') throw new Error(`Expected search term 'k*r', got '${term}'`);
+    const startsWith = await page.$eval('input[ng-model="startsWith"]', el => el.value);
+    if (startsWith !== 'k') throw new Error(`Expected startsWith filter 'k', got '${startsWith}'`);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    const matches = words.filter(w => w.startsWith('k') && /^k.r$/.test(w));
+    if (matches.length === 0) throw new Error(`Expected results matching pattern and startsWith, got ${JSON.stringify(words.slice(0,5))}`);
+  });
+
+  it('search with * character typed manually', async (page) => {
+    await page.type('#srch-term', 'k*r');
+    await page.click('#srch-button');
+    await wait(1000);
+    const url = page.url();
+    if (!url.includes('keyword=k*r')) throw new Error(`Expected URL to contain 'keyword=k*r', got ${url}`);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    const matches = words.filter(w => /^k.r$/.test(w));
+    if (matches.length === 0) throw new Error(`Expected wildcard results, got ${JSON.stringify(words.slice(0,5))}`);
+  });
+
+  it('single * in querystring', async (page) => {
+    await page.goto('http://localhost:8080/?keyword=*', { waitUntil: 'networkidle2' });
+    await page.waitForSelector('#srch-term');
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== '*') throw new Error(`Expected search term '*', got '${term}'`);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    const matches = words.filter(w => w.length === 1);
+    if (matches.length === 0) throw new Error(`Expected 1-character words, got ${JSON.stringify(words.slice(0,5))}`);
+  });
+});
 // Run all tests
 // ---------------------------------------------------------------------------
 runAll().catch((err) => {
