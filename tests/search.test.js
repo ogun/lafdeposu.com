@@ -239,6 +239,40 @@ describe('URL Creation Tests', (it) => {
   });
 });
 
+describe('Edit button toggle Tests', (it) => {
+  it('edit-button toggles visibility of trk-* buttons', async (page) => {
+    // Wait for the edit button and trk-* buttons
+    await page.waitForSelector('#edit-button');
+    await page.waitForSelector('button[id^="trk-"]');
+
+    // Verify that all trk-* buttons initially have the hidden class
+    const buttonsHiddenInitially = await page.$$eval('button[id^="trk-"]', (buttons) =>
+      buttons.every((btn) => btn.classList.contains('hidden'))
+    );
+    if (!buttonsHiddenInitially) throw new Error('All trk-* buttons should have hidden class initially');
+
+    // Click edit-button to show trk-* buttons
+    await page.click('#edit-button');
+    await wait(200);
+
+    // Verify that all trk-* buttons no longer have the hidden class
+    const buttonsVisible = await page.$$eval('button[id^="trk-"]', (buttons) =>
+      buttons.every((btn) => !btn.classList.contains('hidden'))
+    );
+    if (!buttonsVisible) throw new Error('All trk-* buttons should not have hidden class after first click');
+
+    // Click edit-button again to hide trk-* buttons
+    await page.click('#edit-button');
+    await wait(200);
+
+    // Verify that all trk-* buttons have the hidden class again
+    const buttonsHiddenAgain = await page.$$eval('button[id^="trk-"]', (buttons) =>
+      buttons.every((btn) => btn.classList.contains('hidden'))
+    );
+    if (!buttonsHiddenAgain) throw new Error('All trk-* buttons should have hidden class after second click');
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Run all tests
 // ---------------------------------------------------------------------------

@@ -203,6 +203,11 @@
           e.preventDefault();
           $('#filters').toggleClass('hidden');
         });
+        // edit-button toggles Turkish character buttons visibility
+        $('#edit-button').on('click', function(e){
+          e.preventDefault();
+          $("button[id^='trk-']").toggleClass('hidden');
+        });
       });
     </script>
   </body>
