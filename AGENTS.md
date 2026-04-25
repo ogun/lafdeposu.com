@@ -4,6 +4,8 @@
 
 `Laf Deposu` is a client-side Turkish word-finder SPA built with AngularJS 1.x, Bootstrap 3, jQuery 2.1, and **sql.js** (SQLite compiled to WebAssembly). All processing occurs in the browser; the static site is served via a simple HTTP server. Always run test suite after the new implementation. All tests should pass, otherwise rollback your changes. Suggest a commit message after your change.
 
+**Note:** Agent must always suggest a commit message after completing a change. This rule was missed in a previous interaction; ensure it is followed in all future changes.
+
 ## Architecture snapshot (extracted from docs)
 
 - **UI layer** – `index.html` loads AngularJS, Bootstrap, jQuery and the app module (`js/angular.js`).

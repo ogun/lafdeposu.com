@@ -240,6 +240,25 @@ describe('URL Creation Tests', (it) => {
 });
 
 describe('Edit button toggle Tests', (it) => {
+  it('help button href is only #', async (page) => {
+    const href = await page.$eval('#help', el => el.getAttribute('href'));
+    if (href !== '#') throw new Error(`Expected href '#', got '${href}'`);
+  });
+  it('help button toggles help section visibility', async (page) => {
+    // Ensure help section initially hidden
+    const helpHiddenInitially = await page.$eval('#help-section', el => el.classList.contains('hidden'));
+    if (!helpHiddenInitially) throw new Error('Help section should be hidden initially');
+    // Click help button
+    await page.click('#help');
+    await wait(200);
+    const helpVisible = await page.$eval('#help-section', el => !el.classList.contains('hidden'));
+    if (!helpVisible) throw new Error('Help section should be visible after click');
+    // Click again to hide
+    await page.click('#help');
+    await wait(200);
+    const helpHiddenAgain = await page.$eval('#help-section', el => el.classList.contains('hidden'));
+    if (!helpHiddenAgain) throw new Error('Help section should be hidden after second click');
+  });
   it('edit-button toggles visibility of trk-* buttons', async (page) => {
     // Wait for the edit button and trk-* buttons
     await page.waitForSelector('#edit-button');
