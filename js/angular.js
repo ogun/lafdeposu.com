@@ -12,19 +12,19 @@ findWordsApp.factory("Share", function () {
         returnValue.queryString = "";
 
         if (chars != null && chars != "") {
-            returnValue.queryString = chars;
+            returnValue.queryString = "keyword=" + encodeURIComponent(chars);
 
             var filter = "";
             if (startsWith != null && startsWith != "") {
-                filter += "&startsWith=" + startsWith;
+                filter += "&startsWith=" + encodeURIComponent(startsWith);
             }
 
             if (contains != null && contains != "") {
-                filter += "&contains=" + contains;
+                filter += "&contains=" + encodeURIComponent(contains);
             }
 
             if (endsWith != null && endsWith != "") {
-                filter += "&endsWith=" + endsWith;
+                filter += "&endsWith=" + encodeURIComponent(endsWith);
             }
 
             if (resultCharCount != null && resultCharCount != "") {
@@ -90,19 +90,14 @@ findWordsApp.controller("wordListCtrl", ["$scope", "$sce", "FindWord", "Share", 
         var hasFilterParams = false;
 
         params.forEach(function (param) {
-            if (param.indexOf('=') === -1) {
-                // First param without '=' is the search term
-                $scope.chars = param;
-            } else {
-                // key=value pairs for filters
+            var parts = param.split('=');
+            var key = parts[0];
+            var value = decodeURIComponent(parts[1] || '');
+            if (key === 'keyword') {
+                $scope.chars = value;
+            } else if (key === 'startsWith' || key === 'contains' || key === 'endsWith' || key === 'resultCharCount') {
+                $scope[key] = value;
                 hasFilterParams = true;
-                var parts = param.split('=');
-                var key = parts[0];
-                var value = decodeURIComponent(parts[1]);
-
-                if (key === 'startsWith' || key === 'contains' || key === 'endsWith' || key === 'resultCharCount') {
-                    $scope[key] = value;
-                }
             }
         });
 

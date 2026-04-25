@@ -69,7 +69,7 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('URL Querystring Tests', (it) => {
   it('loads page with only search term querystring', async (page) => {
-    await page.goto('http://localhost:8080/?kar', { waitUntil: 'networkidle2' });
+    await page.goto('http://localhost:8080/?keyword=kar', { waitUntil: 'networkidle2' });
     await page.waitForSelector('#srch-term');
     const term = await page.$eval('#srch-term', el => el.value);
     if (term !== 'kar') throw new Error(`Expected search term 'kar', got '${term}'`);
@@ -85,7 +85,7 @@ describe('URL Querystring Tests', (it) => {
   });
 
   it('loads page with search term and startsWith filter', async (page) => {
-    await page.goto('http://localhost:8080/?kemal&startsWith=a', { waitUntil: 'networkidle2' });
+    await page.goto('http://localhost:8080/?keyword=kemal&startsWith=a', { waitUntil: 'networkidle2' });
     await page.waitForSelector('#srch-term');
     const term = await page.$eval('#srch-term', el => el.value);
     if (term !== 'kemal') throw new Error(`Expected search term 'kemal', got '${term}'`);
@@ -103,7 +103,7 @@ describe('URL Querystring Tests', (it) => {
   });
 
   it('loads page with multiple filters and checks results', async (page) => {
-    await page.goto('http://localhost:8080/?kar&contains=a&endsWith=r', { waitUntil: 'networkidle2' });
+    await page.goto('http://localhost:8080/?keyword=kar&contains=a&endsWith=r', { waitUntil: 'networkidle2' });
     await page.waitForSelector('#srch-term');
     const term = await page.$eval('#srch-term', el => el.value);
     if (term !== 'kar') throw new Error(`Expected search term 'kar', got '${term}'`);
@@ -142,7 +142,7 @@ describe('UI Interaction Tests', (it) => {
     await page.click('#srch-button');
     await wait(1000);
     const url = page.url();
-    if (!url.includes('?kar')) throw new Error(`Expected URL to include '?kar', got ${url}`);
+    if (!url.includes('?keyword=kar')) throw new Error(`Expected URL to include '?keyword=kar', got ${url}`);
   });
 
   it('back button should remove query string from URL', async (page) => {
@@ -151,7 +151,7 @@ describe('UI Interaction Tests', (it) => {
     await wait(1000);
     await page.goBack();
     const url = page.url();
-    if (url.includes('?kar')) throw new Error(`Expected URL not to include '?kar', got ${url}`);
+    if (url.includes('?keyword=kar')) throw new Error(`Expected URL not to include '?keyword=kar', got ${url}`);
   });
 
   it('list view should display matching words', async (page) => {
@@ -187,7 +187,7 @@ describe('URL Creation Tests', (it) => {
     await wait(1000);
     const url = page.url();
     const query = url.split('?')[1];
-    if (query !== 'kar') throw new Error(`Expected query 'kar', got '${query}'`);
+    if (query !== 'keyword=kar') throw new Error(`Expected query 'keyword=kar', got '${query}'`);
   });
 
   it('should create URL with chars and startsWith filter', async (page) => {
@@ -198,8 +198,8 @@ describe('URL Creation Tests', (it) => {
     await page.click('#srch-button');
     await wait(1000);
     const url = page.url();
-    if (!url.includes('?kemal&startsWith=a')) {
-      throw new Error(`Expected URL to include '?kemal&startsWith=a', got ${url}`);
+    if (!url.includes('?keyword=kemal&startsWith=a')) {
+      throw new Error(`Expected URL to include '?keyword=kemal&startsWith=a', got ${url}`);
     }
   });
 
@@ -214,7 +214,7 @@ describe('URL Creation Tests', (it) => {
     await page.click('#srch-button');
     await wait(1000);
     const url = page.url();
-    const expectedParts = ['?kemal', 'startsWith=a', 'contains=k', 'endsWith=k', 'resultCharCount=2'];
+    const expectedParts = ['?keyword=kemal', 'startsWith=a', 'contains=k', 'endsWith=k', 'resultCharCount=2'];
     for (const part of expectedParts) {
       if (!url.includes(part)) {
         throw new Error(`Expected URL to include '${part}', got ${url}`);
@@ -235,7 +235,7 @@ describe('URL Creation Tests', (it) => {
     await wait(1000);
     await page.goBack();
     const url = page.url();
-    if (url.includes('?kar')) throw new Error(`Expected URL not to include '?kar', got ${url}`);
+    if (url.includes('?keyword=kar')) throw new Error(`Expected URL not to include '?keyword=kar', got ${url}`);
   });
 });
 
