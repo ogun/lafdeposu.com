@@ -199,6 +199,10 @@
 
       $(document).ready(function () {
         searchTerm.focus();
+        $('#filterAnchor').on('click', function(e){
+          e.preventDefault();
+          $('#filters').toggleClass('hidden');
+        });
       });
     </script>
   </body>

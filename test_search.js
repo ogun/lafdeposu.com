@@ -9,6 +9,20 @@ const puppeteer = require('puppeteer');
     const page = await browser.newPage();
     await page.goto('http://localhost:8080', {waitUntil: 'networkidle2'});
     await page.waitForSelector('#srch-term');
+
+    // test filter toggle
+    const filtersBefore = await page.$eval('#filters', el => el.classList.contains('hidden'));
+    console.log('Filters hidden initially:', filtersBefore);
+    await page.click('#filterAnchor');
+    await new Promise(r=>setTimeout(r,500));
+    let filtersAfter = await page.$eval('#filters', el => el.classList.contains('hidden'));
+    console.log('Filters hidden after first click:', filtersAfter);
+    // toggle again to hide
+    await page.click('#filterAnchor');
+    await new Promise(r=>setTimeout(r,500));
+    const filtersAfter2 = await page.$eval('#filters', el => el.classList.contains('hidden'));
+    console.log('Filters hidden after second click:', filtersAfter2);
+    console.log('Filter toggle RESULT:', (filtersBefore === true && filtersAfter === false && filtersAfter2 === true) ? 'PASS' : 'FAIL');
     await page.type('#srch-term', 'kar');
     await page.click('#srch-button');
     // wait for results to populate; give 2 seconds
