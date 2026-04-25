@@ -233,6 +233,17 @@
           e.preventDefault();
           $('#help-section').toggleClass('hidden');
         });
+        // trk-* button click appends its value to search term
+        $(document).on('click', "button[id^='trk-']", function(e){
+          e.preventDefault();
+          var btnVal = $(this).val();
+          if (!btnVal) {
+            btnVal = $(this).text();
+          }
+          var $search = $('#srch-term');
+          $search.val($search.val() + btnVal);
+          $search.focus();
+        });
       });
     </script>
   </body>

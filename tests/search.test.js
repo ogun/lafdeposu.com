@@ -292,6 +292,53 @@ describe('Edit button toggle Tests', (it) => {
   });
 });
 
+describe('Turkish Character Button Tests', (it) => {
+  it('clicking trk-c button appends ç to empty srch-term', async (page) => {
+    await page.click('#edit-button');
+    await wait(200);
+    await page.click('#trk-c-button');
+    await wait(200);
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== 'ç') throw new Error(`Expected srch-term to be 'ç', got '${term}'`);
+  });
+
+  it('clicking multiple trk buttons appends in order', async (page) => {
+    await page.click('#edit-button');
+    await wait(200);
+    await page.click('#trk-c-button');
+    await page.click('#trk-g-button');
+    await page.click('#trk-i-button');
+    await wait(200);
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== 'çğı') throw new Error(`Expected srch-term to be 'çğı', got '${term}'`);
+  });
+
+  it('clicking non-trk button does not modify srch-term', async (page) => {
+    await page.type('#srch-term', 'test');
+    await page.click('#srch-button');
+    await wait(200);
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== 'test') throw new Error(`Expected srch-term to remain 'test', got '${term}'`);
+  });
+
+  it('clicking trk button appends to existing srch-term value', async (page) => {
+    await page.type('#srch-term', 'ka');
+    await page.click('#edit-button');
+    await wait(200);
+    await page.click('#trk-c-button');
+    await wait(200);
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== 'kaç') throw new Error(`Expected srch-term to be 'kaç', got '${term}'`);
+  });
+
+  it('trk buttons do nothing when hidden', async (page) => {
+    try { await page.click('#trk-c-button'); } catch (e) {}
+    await wait(200);
+    const term = await page.$eval('#srch-term', el => el.value);
+    if (term !== '') throw new Error(`Expected srch-term to be empty, got '${term}'`);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // Run all tests
 // ---------------------------------------------------------------------------
