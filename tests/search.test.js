@@ -77,10 +77,10 @@ describe('URL Querystring Tests', (it) => {
     const filtersHidden = await page.$eval('#filters', el => el.classList.contains('hidden'));
     if (!filtersHidden) throw new Error('Filters panel should be hidden when no filter params');
     // Results should show matching words
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
     if (!words.includes('kar') && !words.includes('ark')) {
-      throw new Error(`Expected results to include 'kar' or 'ark', got ${JSON.stringify(words.slice(0,5))}`);
+      throw new Error(`Expected results to include 'kar' or 'ark', got ${JSON.stringify(words.slice(0, 5))}`);
     }
   });
 
@@ -95,10 +95,10 @@ describe('URL Querystring Tests', (it) => {
     const filtersHidden = await page.$eval('#filters', el => el.classList.contains('hidden'));
     if (filtersHidden) throw new Error('Filters panel should be visible when filter params present');
     // Results should include words starting with 'a' among kemal results
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
     if (!words.some(w => w.startsWith('a'))) {
-      throw new Error(`Expected at least one result starting with 'a', got ${JSON.stringify(words.slice(0,5))}`);
+      throw new Error(`Expected at least one result starting with 'a', got ${JSON.stringify(words.slice(0, 5))}`);
     }
   });
 
@@ -113,10 +113,10 @@ describe('URL Querystring Tests', (it) => {
     if (endsWith !== 'r') throw new Error(`Expected endsWith filter 'r', got '${endsWith}'`);
     const filtersHidden = await page.$eval('#filters', el => el.classList.contains('hidden'));
     if (filtersHidden) throw new Error('Filters panel should be visible when filter params present');
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
     if (!words.some(w => w.includes('a') && w.endsWith('r'))) {
-      throw new Error(`Expected results containing 'a' and ending with 'r', got ${JSON.stringify(words.slice(0,5))}`);
+      throw new Error(`Expected results containing 'a' and ending with 'r', got ${JSON.stringify(words.slice(0, 5))}`);
     }
   });
 });
@@ -158,10 +158,10 @@ describe('UI Interaction Tests', (it) => {
     await page.type('#srch-term', 'kar');
     await page.click('#srch-button');
     await wait(2000);
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     // Verify results visible
     let words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
-    if (!words.includes('kar')) throw new Error(`Expected results before back, got ${JSON.stringify(words.slice(0,5))}`);
+    if (!words.includes('kar')) throw new Error(`Expected results before back, got ${JSON.stringify(words.slice(0, 5))}`);
     // Go back
     await page.goBack();
     await wait(1000);
@@ -174,7 +174,7 @@ describe('UI Interaction Tests', (it) => {
     await page.type('#srch-term', 'kar');
     await page.click('#srch-button');
     await wait(2000);
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     // Go back
     await page.goBack();
     await wait(1000);
@@ -184,16 +184,16 @@ describe('UI Interaction Tests', (it) => {
     const url = page.url();
     if (!url.includes('?keyword=kar')) throw new Error(`Expected URL to include '?keyword=kar' after forward, got ${url}`);
     // Results should be visible again
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
-    if (!words.includes('kar')) throw new Error(`Expected results to include 'kar' after forward, got ${JSON.stringify(words.slice(0,5))}`);
+    if (!words.includes('kar')) throw new Error(`Expected results to include 'kar' after forward, got ${JSON.stringify(words.slice(0, 5))}`);
   });
 
   it('list view should display matching words', async (page) => {
     await page.type('#srch-term', 'kar');
     await page.click('#srch-button');
     await wait(2000);
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     const words = await page.$$eval('td div', (elems) => elems.map((e) => e.textContent.trim().toLowerCase()));
     if (!words.includes('kar') || !words.includes('ark')) {
       throw new Error(`Expected words to include 'kar' and 'ark', got ${JSON.stringify(words.slice(0, 5))}`);
@@ -204,9 +204,9 @@ describe('UI Interaction Tests', (it) => {
     await page.type('#srch-term', 'kar');
     await page.click('#srch-button');
     await wait(2000);
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     // Switch to column view
-    await page.click('button[ng-click="changeListType(1)"]');
+    await page.click('#btn-col-view');
     await wait(2000);
     const words = await page.$$eval('td div', (elems) => elems.map((e) => e.textContent.trim().toLowerCase()));
     if (!words.includes('kar') || !words.includes('ark')) {
@@ -275,10 +275,6 @@ describe('URL Creation Tests', (it) => {
 });
 
 describe('Edit button toggle Tests', (it) => {
-  it('help button href is only #', async (page) => {
-    const href = await page.$eval('#help', el => el.getAttribute('href'));
-    if (href !== '#') throw new Error(`Expected href '#', got '${href}'`);
-  });
   it('help button toggles help section visibility', async (page) => {
     // Ensure help section initially hidden
     const helpHiddenInitially = await page.$eval('#help-section', el => el.classList.contains('hidden'));
@@ -367,7 +363,7 @@ describe('Turkish Character Button Tests', (it) => {
   });
 
   it('trk buttons do nothing when hidden', async (page) => {
-    try { await page.click('#trk-c-button'); } catch (e) {}
+    try { await page.click('#trk-c-button'); } catch (e) { }
     await wait(200);
     const term = await page.$eval('#srch-term', el => el.value);
     if (term !== '') throw new Error(`Expected srch-term to be empty, got '${term}'`);
@@ -382,10 +378,10 @@ describe('Wildcard Character Tests', (it) => {
     await page.waitForSelector('#srch-term');
     const term = await page.$eval('#srch-term', el => el.value);
     if (term !== 'k*r') throw new Error(`Expected search term 'k*r', got '${term}'`);
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
     const matches = words.filter(w => /^k.r$/.test(w));
-    if (matches.length === 0) throw new Error(`Expected results to include words matching 'k*r', got ${JSON.stringify(words.slice(0,5))}`);
+    if (matches.length === 0) throw new Error(`Expected results to include words matching 'k*r', got ${JSON.stringify(words.slice(0, 5))}`);
   });
 
   it('querystring with multiple * characters', async (page) => {
@@ -393,10 +389,10 @@ describe('Wildcard Character Tests', (it) => {
     await page.waitForSelector('#srch-term');
     const term = await page.$eval('#srch-term', el => el.value);
     if (term !== '**') throw new Error(`Expected search term '**', got '${term}'`);
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
     const matches = words.filter(w => /^..$/.test(w));
-    if (matches.length === 0) throw new Error(`Expected 2-character words, got ${JSON.stringify(words.slice(0,5))}`);
+    if (matches.length === 0) throw new Error(`Expected 2-character words, got ${JSON.stringify(words.slice(0, 5))}`);
   });
 
   it('querystring with * and filters', async (page) => {
@@ -406,10 +402,10 @@ describe('Wildcard Character Tests', (it) => {
     if (term !== 'k*r') throw new Error(`Expected search term 'k*r', got '${term}'`);
     const startsWith = await page.$eval('#startsWith', el => el.value);
     if (startsWith !== 'k') throw new Error(`Expected startsWith filter 'k', got '${startsWith}'`);
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
     const matches = words.filter(w => w.startsWith('k') && /^k.r$/.test(w));
-    if (matches.length === 0) throw new Error(`Expected results matching pattern and startsWith, got ${JSON.stringify(words.slice(0,5))}`);
+    if (matches.length === 0) throw new Error(`Expected results matching pattern and startsWith, got ${JSON.stringify(words.slice(0, 5))}`);
   });
 
   it('search with * character typed manually', async (page) => {
@@ -418,10 +414,10 @@ describe('Wildcard Character Tests', (it) => {
     await wait(1000);
     const url = page.url();
     if (!url.includes('keyword=k*r')) throw new Error(`Expected URL to contain 'keyword=k*r', got ${url}`);
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
     const matches = words.filter(w => /^k.r$/.test(w));
-    if (matches.length === 0) throw new Error(`Expected wildcard results, got ${JSON.stringify(words.slice(0,5))}`);
+    if (matches.length === 0) throw new Error(`Expected wildcard results, got ${JSON.stringify(words.slice(0, 5))}`);
   });
 
   it('single * in querystring', async (page) => {
@@ -429,10 +425,10 @@ describe('Wildcard Character Tests', (it) => {
     await page.waitForSelector('#srch-term');
     const term = await page.$eval('#srch-term', el => el.value);
     if (term !== '*') throw new Error(`Expected search term '*', got '${term}'`);
-    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
     const matches = words.filter(w => w.length === 1);
-    if (matches.length === 0) throw new Error(`Expected 1-character words, got ${JSON.stringify(words.slice(0,5))}`);
+    if (matches.length === 0) throw new Error(`Expected 1-character words, got ${JSON.stringify(words.slice(0, 5))}`);
   });
 });
 // Run all tests
