@@ -154,6 +154,41 @@ describe('UI Interaction Tests', (it) => {
     if (url.includes('?keyword=kar')) throw new Error(`Expected URL not to include '?keyword=kar', got ${url}`);
   });
 
+  it('back button should clear results', async (page) => {
+    await page.type('#srch-term', 'kar');
+    await page.click('#srch-button');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    // Verify results visible
+    let words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    if (!words.includes('kar')) throw new Error(`Expected results before back, got ${JSON.stringify(words.slice(0,5))}`);
+    // Go back
+    await page.goBack();
+    await wait(1000);
+    // Results should be cleared (no table)
+    const tableCount = await page.$$eval('table.table', elems => elems.length);
+    if (tableCount > 0) throw new Error(`Expected no results after back, but found ${tableCount} tables`);
+  });
+
+  it('forward button should restore query and results after back', async (page) => {
+    await page.type('#srch-term', 'kar');
+    await page.click('#srch-button');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    // Go back
+    await page.goBack();
+    await wait(1000);
+    // Go forward
+    await page.goForward();
+    await wait(2000);
+    const url = page.url();
+    if (!url.includes('?keyword=kar')) throw new Error(`Expected URL to include '?keyword=kar' after forward, got ${url}`);
+    // Results should be visible again
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    if (!words.includes('kar')) throw new Error(`Expected results to include 'kar' after forward, got ${JSON.stringify(words.slice(0,5))}`);
+  });
+
   it('list view should display matching words', async (page) => {
     await page.type('#srch-term', 'kar');
     await page.click('#srch-button');

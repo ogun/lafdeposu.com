@@ -83,12 +83,12 @@ findWordsApp.controller("wordListCtrl", ["$scope", "$sce", "FindWord", "Share", 
         $scope.share = Share.createLink($scope.chars, $scope.startsWith, $scope.contains, $scope.endsWith, $scope.resultCharCount);
     }
 
-    // Parse querystring on page load
-    var queryString = window.location.search.substring(1);
-    if (queryString) {
+    // Function to parse querystring and execute search
+    function parseQueryAndSearch() {
+        var queryString = window.location.search.substring(1);
+        if (!queryString) { return; }
         var params = queryString.split('&');
         var hasFilterParams = false;
-
         params.forEach(function (param) {
             var parts = param.split('=');
             var key = parts[0];
@@ -100,26 +100,21 @@ findWordsApp.controller("wordListCtrl", ["$scope", "$sce", "FindWord", "Share", 
                 hasFilterParams = true;
             }
         });
-        // Ensure Angular updates the view with the parsed keyword (e.g., '*')
+        // Angular digest
         if (typeof $scope.$applyAsync === 'function') {
             $scope.$applyAsync();
         } else if (typeof $scope.$apply === 'function') {
             $scope.$apply();
         }
-
-        // Show filter panel if any filter params present
+        // Show filters if needed
         if (hasFilterParams) {
             setTimeout(function () {
                 var filtersDiv = document.getElementById('filters');
-                if (filtersDiv) {
-                    filtersDiv.classList.remove('hidden');
-                }
+                if (filtersDiv) { filtersDiv.classList.remove('hidden'); }
             }, 0);
         }
-
-        // Trigger search if search term found
+        // Trigger search if term present
         if ($scope.chars) {
-            // Ensure DB loaded before search
             if (window.db) {
                 if (typeof $scope.$applyAsync === 'function') {
                     $scope.$applyAsync($scope.findWordsClick);
@@ -127,7 +122,6 @@ findWordsApp.controller("wordListCtrl", ["$scope", "$sce", "FindWord", "Share", 
                     $scope.$apply($scope.findWordsClick);
                 }
             } else {
-                // Wait for DB ready event
                 window.addEventListener('dbReady', function onDbReady() {
                     window.removeEventListener('dbReady', onDbReady);
                     if (typeof $scope.$applyAsync === 'function') {
@@ -139,6 +133,29 @@ findWordsApp.controller("wordListCtrl", ["$scope", "$sce", "FindWord", "Share", 
             }
         }
     }
+
+    // Parse on initial load
+    parseQueryAndSearch();
+
+    // Handle back/forward navigation
+    window.addEventListener('popstate', function () {
+        // Reset state for both back/forward navigation
+        $scope.wordList = [];
+        $scope.share = {};
+
+        // Force Angular digest to ensure view updates
+        if (typeof $scope.$applyAsync === 'function') {
+            $scope.$applyAsync(function () {
+                parseQueryAndSearch();
+            });
+        } else if (typeof $scope.$apply === 'function') {
+            $scope.$apply(function () {
+                parseQueryAndSearch();
+            });
+        } else {
+            parseQueryAndSearch();
+        }
+    });
 
     // Kullanıcının tercihini kaydedelim
     $scope.changeListType = function (value) {
