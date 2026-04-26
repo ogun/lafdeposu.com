@@ -163,61 +163,8 @@
     <!-- JavaScript
     ================================================== -->
 
-    <script src="dist/jquery-2.1.1.min.js"></script>
     <script src="js/custom.js"></script>
 
-    <script>
-      // Get the elements
-      const searchTerm = document.getElementById("srch-term");
-      const searchButton = document.getElementById("srch-button");
 
-      // Add keypress event listener
-      searchTerm.addEventListener("keypress", function (event) {
-        // Check if Enter key was pressed (key code 13 or key 'Enter')
-        if (event.key === "Enter" || event.keyCode === 13) {
-          // Prevent default form submission if inside a form
-          event.preventDefault();
-
-          // Trigger click on the button
-          searchTerm.select();
-          searchButton.click();
-        }
-      });
-
-      $(document).ready(function () {
-        searchTerm.focus();
-        $('#filterAnchor').on('click', function(e){
-          e.preventDefault();
-          $('#filters').toggleClass('hidden');
-          $(this).toggleClass('active', !$('#filters').hasClass('hidden'));
-        });
-        // edit-button toggles Turkish character buttons visibility
-        $('#edit-button').on('click', function(e){
-          e.preventDefault();
-          $("button[id^='trk-']").toggleClass('hidden');
-          // toggle active class based on visibility of Turkish buttons
-          var hidden = $("button[id^='trk-']").first().hasClass('hidden');
-          $('#edit-button').toggleClass('active', !hidden);
-        });
-        // help button toggles help section visibility
-        $('#help').on('click', function(e){
-          e.preventDefault();
-          $('#help-section').toggleClass('hidden');
-          // toggle active class based on visibility of help section
-          $('#help').toggleClass('active', !$('#help-section').hasClass('hidden'));
-        });
-        // trk-* button click appends its value to search term
-        $(document).on('click', "button[id^='trk-']", function(e){
-          e.preventDefault();
-          var btnVal = $(this).val();
-          if (!btnVal) {
-            btnVal = $(this).text();
-          }
-          var $search = $('#srch-term');
-          $search.val($search.val() + btnVal);
-          $search.focus();
-        });
-      });
-    </script>
   </body>
 </html>

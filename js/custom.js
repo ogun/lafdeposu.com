@@ -67,6 +67,80 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     updateViewButtons();
+
+    var searchTerm = document.getElementById("srch-term");
+    if (searchTerm) {
+        searchTerm.addEventListener("keypress", function (event) {
+            if (event.key === "Enter" || event.keyCode === 13) {
+                event.preventDefault();
+                searchTerm.select();
+                var searchBtn = document.getElementById('srch-button');
+                if (searchBtn) searchBtn.click();
+            }
+        });
+        searchTerm.focus();
+    }
+
+    var filterAnchor = document.getElementById('filterAnchor');
+    var filtersBlock = document.getElementById('filters');
+    if (filterAnchor && filtersBlock) {
+        filterAnchor.addEventListener('click', function(e) {
+            e.preventDefault();
+            filtersBlock.classList.toggle('hidden');
+            if (filtersBlock.classList.contains('hidden')) {
+                filterAnchor.classList.remove('active');
+            } else {
+                filterAnchor.classList.add('active');
+            }
+        });
+    }
+
+    var editBtn = document.getElementById('edit-button');
+    if (editBtn) {
+        editBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var trBtns = document.querySelectorAll("button[id^='trk-']");
+            var isHidden = false;
+            trBtns.forEach(function(btn, index) {
+                btn.classList.toggle('hidden');
+                if (index === 0) {
+                    isHidden = btn.classList.contains('hidden');
+                }
+            });
+            if (isHidden) {
+                editBtn.classList.remove('active');
+            } else {
+                editBtn.classList.add('active');
+            }
+        });
+    }
+
+    var helpBtn = document.getElementById('help');
+    var helpSection = document.getElementById('help-section');
+    if (helpBtn && helpSection) {
+        helpBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            helpSection.classList.toggle('hidden');
+            if (helpSection.classList.contains('hidden')) {
+                helpBtn.classList.remove('active');
+            } else {
+                helpBtn.classList.add('active');
+            }
+        });
+    }
+
+    var trBtns = document.querySelectorAll("button[id^='trk-']");
+    trBtns.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            var btnVal = this.value || this.textContent;
+            var searchInput = document.getElementById('srch-term');
+            if (searchInput) {
+                searchInput.value = searchInput.value + btnVal;
+                searchInput.focus();
+            }
+        });
+    });
 });
 
 function changeListType(value) {
