@@ -48,8 +48,6 @@ h5 { font-size: 14px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
 .hidden { display: none !important; }
 .text-right { text-align: right; }
-.text-center { text-align: center; }
-.small { font-size: 85%; }
 
 .container {
     padding-right: 15px;
@@ -395,12 +393,6 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
 
         <hr />
 
-        <article id="loadingContainer" class="row hidden">
-          <div class="col-md-12 small text-center" id="loading">
-            <img src="img/ajax-loader.gif" alt="Yükleniyor" width="32" height="32" /> Yükleniyor lütfen bekleyiniz...
-          </div>
-        </article>
-
         <!-- Dynamic Toggles -->
         <article class="row hidden" id="viewTypeToggles">
           <div class="col-md-12 text-right">
@@ -443,7 +435,6 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
             parseQueryAndSearch();
         } catch (e) {
             console.error('Veritabanı yüklenirken bir hata oluştu: ', e);
-            document.getElementById('loading').textContent = 'Sözlük yüklenemedi.';
         }
 
         /* -----------------------
