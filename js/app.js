@@ -76,8 +76,8 @@ function createCommandText(input, resultCharCount) {
         });
     }
 
-    // If resultCharCount is undefined or null, apply this condition
-    if (resultCharCount == null) {
+    // If resultCharCount is undefined, null or false, apply this condition
+    if (!resultCharCount) {
         if (hasAsterix) {
             // Wildcard present: allow any length up to input length, no lower bound
             commandText.push(`length <= ${inputLength} ORDER BY length DESC, word`);
