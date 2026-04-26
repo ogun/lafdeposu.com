@@ -89,7 +89,7 @@ describe('URL Querystring Tests', (it) => {
     await page.waitForSelector('#srch-term');
     const term = await page.$eval('#srch-term', el => el.value);
     if (term !== 'kemal') throw new Error(`Expected search term 'kemal', got '${term}'`);
-    const startsWith = await page.$eval('input[ng-model="startsWith"]', el => el.value);
+    const startsWith = await page.$eval('#startsWith', el => el.value);
     if (startsWith !== 'a') throw new Error(`Expected startsWith filter 'a', got '${startsWith}'`);
     // Filter panel should be visible
     const filtersHidden = await page.$eval('#filters', el => el.classList.contains('hidden'));
@@ -107,9 +107,9 @@ describe('URL Querystring Tests', (it) => {
     await page.waitForSelector('#srch-term');
     const term = await page.$eval('#srch-term', el => el.value);
     if (term !== 'kar') throw new Error(`Expected search term 'kar', got '${term}'`);
-    const contains = await page.$eval('input[ng-model="contains"]', el => el.value);
+    const contains = await page.$eval('#contains', el => el.value);
     if (contains !== 'a') throw new Error(`Expected contains filter 'a', got '${contains}'`);
-    const endsWith = await page.$eval('input[ng-model="endsWith"]', el => el.value);
+    const endsWith = await page.$eval('#endsWith', el => el.value);
     if (endsWith !== 'r') throw new Error(`Expected endsWith filter 'r', got '${endsWith}'`);
     const filtersHidden = await page.$eval('#filters', el => el.classList.contains('hidden'));
     if (filtersHidden) throw new Error('Filters panel should be visible when filter params present');
@@ -229,7 +229,7 @@ describe('URL Creation Tests', (it) => {
     await page.click('#filterAnchor');
     await wait(500);
     await page.type('#srch-term', 'kemal');
-    await page.type('input[ng-model="startsWith"]', 'a');
+    await page.type('#startsWith', 'a');
     await page.click('#srch-button');
     await wait(1000);
     const url = page.url();
@@ -242,10 +242,10 @@ describe('URL Creation Tests', (it) => {
     await page.click('#filterAnchor');
     await wait(500);
     await page.type('#srch-term', 'kemal');
-    await page.type('input[ng-model="startsWith"]', 'a');
-    await page.type('input[ng-model="contains"]', 'k');
-    await page.type('input[ng-model="endsWith"]', 'k');
-    await page.click('input[ng-model="resultCharCount"]'); // toggle to 2?
+    await page.type('#startsWith', 'a');
+    await page.type('#contains', 'k');
+    await page.type('#endsWith', 'k');
+    await page.click('#resultCharCount'); // toggle to 2?
     await page.click('#srch-button');
     await wait(1000);
     const url = page.url();
@@ -404,7 +404,7 @@ describe('Wildcard Character Tests', (it) => {
     await page.waitForSelector('#srch-term');
     const term = await page.$eval('#srch-term', el => el.value);
     if (term !== 'k*r') throw new Error(`Expected search term 'k*r', got '${term}'`);
-    const startsWith = await page.$eval('input[ng-model="startsWith"]', el => el.value);
+    const startsWith = await page.$eval('#startsWith', el => el.value);
     if (startsWith !== 'k') throw new Error(`Expected startsWith filter 'k', got '${startsWith}'`);
     await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => {});
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
