@@ -2,14 +2,14 @@
 
 ## Overview
 
-`Laf Deposu` is a client-side Turkish word-finder SPA built with AngularJS 1.x, Bootstrap 3, jQuery 2.1, and **sql.js** (SQLite compiled to WebAssembly). All processing occurs in the browser; the static site is served via a simple HTTP server. Always run test suite after the new implementation. All tests should pass, otherwise rollback your changes. Suggest a commit message after your change.
+`Laf Deposu` is a client-side Turkish word-finder SPA built with **sql.js** (SQLite compiled to WebAssembly) and vanilla JavaScript. All processing occurs in the browser; the static site is served via a simple HTTP server. Always run test suite after the new implementation. All tests should pass, otherwise rollback your changes. Suggest a commit message after your change.
 
 **Note:** Agent must always suggest a commit message after completing a change. This rule was missed in a previous interaction; ensure it is followed in all future changes.
 
 ## Architecture snapshot (extracted from docs)
 
-- **UI layer** – `index.html` loads AngularJS, Bootstrap, jQuery and the app module (`js/angular.js`).
-- **Core logic** – `js/app.js` initializes `sql.js`, loads `data/dict.db`, builds SQL queries (`createCommandText`) and filters results (`controlDbWord`, `controlFilter`).
+- **UI layer** – `index.html` loads the application scripts and **sql.js** library.
+- **Core logic** – inline script in `index.html` initializes `sql.js`, loads `data/dict.db`, builds SQL queries and filters results.
 - **Data layer** – `data/dict.db` (SQLite) holds the `dictionary` table (`word`, `meaning`). The DB is fetched once on page load and kept in memory.
 - **Views** – two display modes: list view and column view, toggled by `changeListType(1)`/`changeListType(0)`. Preferences stored in cookies.
 
@@ -66,7 +66,6 @@
 
 ## Common pitfalls
 
-- **Missing libraries** – keep `dist/jquery-2.1.1.min.js`, `dist/bootstrap.min.js`, and all Angular scripts referenced in `index.html`.
 - **Browser executable** – Puppeteer expects Chrome at `/usr/bin/google-chrome`. Adjust `executablePath` in `tests/search.test.js` if Chrome is installed elsewhere.
 - **Server port** – tests expect `http://localhost:8080`. Ensure no other process occupies this port before starting `server.js`.
 - **Cache** – after code changes, do a hard refresh (Ctrl+F5) to avoid stale JS or DB files.
