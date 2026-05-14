@@ -1,11 +1,13 @@
 {
   "scripts": {
-    "test": "node tests/search.test.js"
+    "test": "node tests/search.test.js",
+    "build:sitemap": "node scripts/generate_sitemaps.js"
   },
   "dependencies": {
     "puppeteer": "^24.42.0"
   },
   "devDependencies": {
+    "better-sqlite3": "^12.10.0",
     "jest": "^30.3.0"
   }
 }
