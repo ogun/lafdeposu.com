@@ -210,6 +210,36 @@ describe('UI Interaction Tests', (it) => {
     if (!words.includes('kar')) throw new Error(`Expected results to include 'kar' after forward, got ${JSON.stringify(words.slice(0, 5))}`);
   });
 
+  it('pressing Enter on #srch-term triggers immediate search', async (page) => {
+    await page.type('#srch-term', 'kar');
+    await page.keyboard.press('Enter');
+    await wait(500); // Less than the 1s debounce
+    await page.waitForSelector('table.table', { timeout: 1000 }).catch(() => { });
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    if (!words.includes('kar') && !words.includes('ark')) {
+      throw new Error(`Expected results immediately after Enter, got ${JSON.stringify(words.slice(0, 5))}`);
+    }
+  });
+
+  it('two-letter word filter restricts results', async (page) => {
+    await page.type('#srch-term', 'kar');
+    await page.click('#filterAnchor');
+    await wait(500);
+    // Click the label so it toggles the checkbox properly
+    await page.click('label[for="resultCharCount"], #resultCharCount');
+    await page.click('#srch-button');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    const nonTwoLetter = words.filter(w => w.length !== 2);
+    if (nonTwoLetter.length > 0) {
+      throw new Error(`Expected only 2-letter words, but got: ${JSON.stringify(nonTwoLetter)}`);
+    }
+    if (words.length === 0) {
+      throw new Error('Expected 2-letter word results, got none');
+    }
+  });
+
   it('list view should display matching words', async (page) => {
     await page.type('#srch-term', 'kar');
     await page.click('#srch-button');
@@ -233,6 +263,31 @@ describe('UI Interaction Tests', (it) => {
     if (!words.includes('kar') || !words.includes('ark')) {
       throw new Error(`Expected words to include 'kar' and 'ark', got ${JSON.stringify(words.slice(0, 5))}`);
     }
+  });
+});
+
+describe('View State Persistence Tests', (it) => {
+  it('reloading page preserves column view preference', async (page) => {
+    await page.type('#srch-term', 'kar');
+    await page.click('#srch-button');
+    await wait(2000);
+    
+    await page.click('#btn-col-view');
+    await wait(500);
+    
+    await page.reload({ waitUntil: 'networkidle2' });
+    await page.waitForSelector('#srch-term');
+    
+    const btnColActive = await page.$eval('#btn-col-view', el => el.classList.contains('active'));
+    if (!btnColActive) throw new Error('Expected column view button to be active after reload');
+    
+    await page.type('#srch-term', 'kar');
+    await page.click('#srch-button');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
+    
+    const hasThead = await page.$$eval('table.table thead', elems => elems.length > 0);
+    if (!hasThead) throw new Error('Expected column view table format (with thead) after reload');
   });
 });
 
@@ -439,6 +494,18 @@ describe('Wildcard Character Tests', (it) => {
     const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
     const matches = words.filter(w => /^k.r$/.test(w));
     if (matches.length === 0) throw new Error(`Expected wildcard results, got ${JSON.stringify(words.slice(0, 5))}`);
+  });
+
+  it('wildcard characters are highlighted with .j class', async (page) => {
+    await page.goto('http://localhost:8080/?keyword=k*r', { waitUntil: 'networkidle2' });
+    await page.waitForSelector('#srch-term');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
+    
+    const highlighted = await page.$$eval('td div span.j', elems => elems.length);
+    if (highlighted === 0) {
+      throw new Error('Expected joker characters to be wrapped in span.j');
+    }
   });
 
   it('single * in querystring', async (page) => {

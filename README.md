@@ -52,7 +52,7 @@ npm install
 ### Run Local Server
 
 ```bash
-node server.js
+npm start
 ```
 
 Open `http://localhost:8080` in your browser.
