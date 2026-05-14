@@ -16,7 +16,6 @@ function describe(suiteName, builder) {
 
 async function runAll() {
   const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/google-chrome',
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
@@ -135,6 +134,28 @@ describe('UI Interaction Tests', (it) => {
     await wait(500);
     const filtersAfterSecond = await page.$eval('#filters', (el) => el.classList.contains('hidden'));
     if (!filtersAfterSecond) throw new Error('Filters should be hidden after second click');
+  });
+
+  it('keypress on #srch-term triggers search', async (page) => {
+    await page.type('#srch-term', 'kar');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
+    const words = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    if (!words.includes('kar') && !words.includes('ark')) {
+      throw new Error(`Expected results to include 'kar' or 'ark', got ${JSON.stringify(words.slice(0, 5))}`);
+    }
+  });
+
+  it('typing should debounce URL update for 1 second', async (page) => {
+    await page.type('#srch-term', 'k');
+    await wait(200); // Less than 1 second
+    let url = page.url();
+    if (url.includes('?keyword=')) throw new Error(`URL should not update immediately during typing, got ${url}`);
+    
+    await page.type('#srch-term', 'ar');
+    await wait(1200); // Wait for debounce
+    url = page.url();
+    if (!url.includes('?keyword=kar')) throw new Error(`URL should update after 1 second of inactivity, got ${url}`);
   });
 
   it('search should update URL with query string', async (page) => {

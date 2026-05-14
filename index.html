@@ -420,6 +420,8 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
         let db = null;
         let wordList = [];
         let listType = getCookie('listType') ? parseInt(getCookie('listType')) : 0;
+        let typingTimer;
+        const TYPING_INTERVAL = 1000;
         
         // Setup UI handlers immediately before DB loads
         initEventListeners();
@@ -477,7 +479,7 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
             });
 
             // Action triggers Context
-            document.getElementById('srch-button')?.addEventListener('click', performSearch);
+            document.getElementById('srch-button')?.addEventListener('click', () => performSearch(false));
 
             const searchTerm = document.getElementById("srch-term");
             if (searchTerm) {
@@ -488,6 +490,7 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
                         document.getElementById('srch-button')?.click();
                     }
                 });
+                searchTerm.addEventListener("input", () => performSearch(true));
                 searchTerm.focus();
             }
 
@@ -713,23 +716,31 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
             return list;
         }
 
-        function performSearch() {
+        function performSearch(isInput = false) {
             const chars = document.getElementById('srch-term').value;
             const startsWith = document.getElementById('startsWith').value;
             const contains = document.getElementById('contains').value;
             const endsWith = document.getElementById('endsWith').value;
             const resultCharCount = document.getElementById('resultCharCount').checked;
 
+            clearTimeout(typingTimer);
+
+            if (isInput) {
+                typingTimer = setTimeout(() => {
+                    updateURL(chars, startsWith, contains, endsWith, resultCharCount);
+                }, TYPING_INTERVAL);
+            } else {
+                updateURL(chars, startsWith, contains, endsWith, resultCharCount);
+            }
+
             if (!chars || !db) {
                 wordList = [];
                 clearDOM();
-                updateURL(chars, startsWith, contains, endsWith, resultCharCount);
                 return;
             }
 
             const rawList = createResult(chars, startsWith, contains, endsWith, resultCharCount);
             wordList = processWordList(rawList);
-            updateURL(chars, startsWith, contains, endsWith, resultCharCount);
             renderResults();
         }
 
@@ -747,6 +758,9 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
             }
 
             const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+            
+            if (window.location.pathname + window.location.search === newUrl) return;
+
             window.history.pushState({ path: newUrl }, '', newUrl);
         }
 
