@@ -210,6 +210,25 @@ describe('UI Interaction Tests', (it) => {
     if (!words.includes('kar')) throw new Error(`Expected results to include 'kar' after forward, got ${JSON.stringify(words.slice(0, 5))}`);
   });
 
+  it('page title is updated to match search keyword', async (page) => {
+    await page.type('#srch-term', 'kar');
+    await page.click('#srch-button');
+    await wait(1000);
+    const title = await page.title();
+    if (title !== 'kar | Laf Deposu') throw new Error(`Expected title 'kar | Laf Deposu', got '${title}'`);
+    
+    // Test clearing search resets title
+    await page.click('#srch-term');
+    await page.keyboard.down('Control');
+    await page.keyboard.press('A');
+    await page.keyboard.up('Control');
+    await page.keyboard.press('Backspace');
+    await page.click('#srch-button');
+    await wait(1000);
+    const newTitle = await page.title();
+    if (newTitle !== 'Laf Deposu') throw new Error(`Expected title 'Laf Deposu', got '${newTitle}'`);
+  });
+
   it('pressing Enter on #srch-term triggers immediate search', async (page) => {
     await page.type('#srch-term', 'kar');
     await page.keyboard.press('Enter');

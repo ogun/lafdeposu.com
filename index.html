@@ -736,8 +736,11 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
             if (!chars || !db) {
                 wordList = [];
                 clearDOM();
+                document.title = 'Laf Deposu';
                 return;
             }
+
+            document.title = `${chars} | Laf Deposu`;
 
             const rawList = createResult(chars, startsWith, contains, endsWith, resultCharCount);
             wordList = processWordList(rawList);
@@ -782,6 +785,7 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
 
             if (!queryString) { 
                 clearDOM();
+                document.title = 'Laf Deposu';
                 return; 
             }
             
