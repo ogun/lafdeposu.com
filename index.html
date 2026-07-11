@@ -419,7 +419,7 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
         // Encapsulated Module State
         let db = null;
         let wordList = [];
-        let listType = getCookie('listType') ? parseInt(getCookie('listType')) : 0;
+        let listType = localStorage.getItem('listType') ? parseInt(localStorage.getItem('listType')) : 0;
         let typingTimer;
         const TYPING_INTERVAL = 1000;
         
@@ -437,29 +437,6 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
             parseQueryAndSearch();
         } catch (e) {
             console.error('Veritabanı yüklenirken bir hata oluştu: ', e);
-        }
-
-        /* -----------------------
-           Local Cookie API
-        ------------------------ */
-        function setCookie(name, value, days) {
-            let expires = "";
-            if (days) {
-                const date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = `; expires=${date.toUTCString()}`;
-            }
-            document.cookie = `${name}=${value || ""}${expires}; path=/`;
-        }
-
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for (let i = 0; i < ca.length; i++) {
-                let c = ca[i].trim();
-                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-            }
-            return null;
         }
 
         /* -----------------------
@@ -561,7 +538,7 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
         ------------------------ */
         function changeListType(value) {
             listType = value;
-            setCookie('listType', value, 365);
+            localStorage.setItem('listType', value);
             updateViewButtons();
             renderResults();
         }
@@ -644,19 +621,8 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
         }
 
         function controlFilter(dbWord, startsWith, contains, endsWith) {
-            if (startsWith && startsWith.trim() !== '') {
-                const startsWithList = startsWith.split(',').filter(Boolean);
-                if (!startsWithList.some(w => dbWord.startsWith(w.toLocaleLowerCase('tr-TR')))) return false;
-            }
-            if (contains && contains.trim() !== '') {
-                const containsList = contains.split(',').filter(Boolean);
-                if (!containsList.some(w => dbWord.includes(w))) return false;
-            }
-            if (endsWith && endsWith.trim() !== '') {
-                const endsWithList = endsWith.split(',').filter(Boolean);
-                if (!endsWithList.some(w => dbWord.endsWith(w.toLocaleLowerCase('tr-TR')))) return false;
-            }
-            return true;
+            const check = (str, method) => !str || str.trim() === '' || str.split(',').filter(Boolean).some(w => dbWord[method](w.toLocaleLowerCase('tr-TR')));
+            return check(startsWith, 'startsWith') && check(contains, 'includes') && check(endsWith, 'endsWith');
         }
 
         function createResult(input, startsWith, contains, endsWith, resultCharCount) {
@@ -751,16 +717,17 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
            Routing & Rendering 
         ------------------------ */
         function updateURL(chars, startsWith, contains, endsWith, resultCharCount) {
-            let queryString = "";
+            const params = new URLSearchParams();
             if (chars) {
-                queryString = `keyword=${encodeURIComponent(chars)}`;
-                if (startsWith) queryString += `&startsWith=${encodeURIComponent(startsWith)}`;
-                if (contains) queryString += `&contains=${encodeURIComponent(contains)}`;
-                if (endsWith) queryString += `&endsWith=${encodeURIComponent(endsWith)}`;
-                if (resultCharCount) queryString += "&resultCharCount=2";
+                params.set('keyword', chars);
+                if (startsWith) params.set('startsWith', startsWith);
+                if (contains) params.set('contains', contains);
+                if (endsWith) params.set('endsWith', endsWith);
+                if (resultCharCount) params.set('resultCharCount', '2');
             }
 
-            const newUrl = queryString ? `${window.location.pathname}?${queryString}` : window.location.pathname;
+            const qs = params.toString();
+            const newUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
             
             if (window.location.pathname + window.location.search === newUrl) return;
 
@@ -789,15 +756,12 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
                 return; 
             }
             
-            queryString.split('&').forEach(param => {
-                const [key, valRaw] = param.split('=');
-                const value = decodeURIComponent(valRaw || '');
-                if (key === 'keyword' && srchTermEl) srchTermEl.value = value;
-                else if (key === 'startsWith' && startsWithEl) { startsWithEl.value = value; hasFilterParams = true; }
-                else if (key === 'contains' && containsEl) { containsEl.value = value; hasFilterParams = true; }
-                else if (key === 'endsWith' && endsWithEl) { endsWithEl.value = value; hasFilterParams = true; }
-                else if (key === 'resultCharCount' && resultCharCountEl) { if (value) resultCharCountEl.checked = true; hasFilterParams = true; }
-            });
+            const params = new URLSearchParams(queryString);
+            if (srchTermEl && params.has('keyword')) srchTermEl.value = params.get('keyword');
+            if (startsWithEl && params.has('startsWith')) { startsWithEl.value = params.get('startsWith'); hasFilterParams = true; }
+            if (containsEl && params.has('contains')) { containsEl.value = params.get('contains'); hasFilterParams = true; }
+            if (endsWithEl && params.has('endsWith')) { endsWithEl.value = params.get('endsWith'); hasFilterParams = true; }
+            if (resultCharCountEl && params.has('resultCharCount')) { resultCharCountEl.checked = true; hasFilterParams = true; }
 
             if (hasFilterParams) {
                 document.getElementById('filters')?.classList.remove('hidden');
