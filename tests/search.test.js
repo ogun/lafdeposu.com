@@ -285,6 +285,90 @@ describe('UI Interaction Tests', (it) => {
   });
 });
 
+describe('Filter Input Auto-Search Tests', (it) => {
+  it('typing in #startsWith filters results automatically', async (page) => {
+    await page.type('#srch-term', 'kemal');
+    await page.click('#srch-button');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
+    const wordsBefore = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    // Open filters and type in startsWith
+    await page.click('#filterAnchor');
+    await wait(500);
+    await page.type('#startsWith', 'k');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
+    const wordsAfter = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    // All results should start with 'k'
+    const nonMatching = wordsAfter.filter(w => !w.startsWith('k'));
+    if (nonMatching.length > 0) {
+      throw new Error(`Expected all results to start with 'k', but found: ${JSON.stringify(nonMatching)}`);
+    }
+    if (wordsAfter.length >= wordsBefore.length) {
+      throw new Error(`Expected fewer results after startsWith filter, got ${wordsAfter.length} vs ${wordsBefore.length}`);
+    }
+  });
+
+  it('typing in #contains filters results automatically', async (page) => {
+    await page.type('#srch-term', 'kemal');
+    await page.click('#srch-button');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
+    // Open filters and type in contains
+    await page.click('#filterAnchor');
+    await wait(500);
+    await page.type('#contains', 'em');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
+    const wordsAfter = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    // All results should contain 'em'
+    const nonMatching = wordsAfter.filter(w => !w.includes('em'));
+    if (nonMatching.length > 0) {
+      throw new Error(`Expected all results to contain 'em', but found: ${JSON.stringify(nonMatching)}`);
+    }
+    if (wordsAfter.length === 0) {
+      throw new Error('Expected at least one result containing "em"');
+    }
+  });
+
+  it('typing in #endsWith filters results automatically', async (page) => {
+    await page.type('#srch-term', 'kemal');
+    await page.click('#srch-button');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
+    // Open filters and type in endsWith
+    await page.click('#filterAnchor');
+    await wait(500);
+    await page.type('#endsWith', 'ak');
+    await wait(2000);
+    await page.waitForSelector('table.table', { timeout: 5000 }).catch(() => { });
+    const wordsAfter = await page.$$eval('td div', elems => elems.map(e => e.textContent.trim().toLowerCase()));
+    // All results should end with 'ak'
+    const nonMatching = wordsAfter.filter(w => !w.endsWith('ak'));
+    if (nonMatching.length > 0) {
+      throw new Error(`Expected all results to end with 'ak', but found: ${JSON.stringify(nonMatching)}`);
+    }
+    if (wordsAfter.length === 0) {
+      throw new Error('Expected at least one result ending with "ak"');
+    }
+  });
+
+  it('filter auto-search updates URL after debounce', async (page) => {
+    await page.type('#srch-term', 'kemal');
+    await page.click('#srch-button');
+    await wait(1000);
+    // Open filters and type in startsWith
+    await page.click('#filterAnchor');
+    await wait(500);
+    await page.type('#startsWith', 'k');
+    await wait(1500);
+    const url = page.url();
+    if (!url.includes('startsWith=k')) {
+      throw new Error(`Expected URL to include 'startsWith=k', got ${url}`);
+    }
+  });
+});
+
 describe('View State Persistence Tests', (it) => {
   it('reloading page preserves column view preference', async (page) => {
     await page.type('#srch-term', 'kar');

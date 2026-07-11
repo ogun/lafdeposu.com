@@ -471,6 +471,11 @@ table { background-color: transparent; border-spacing: 0; border-collapse: colla
                 searchTerm.focus();
             }
 
+            // Filter inputs auto-search on typing
+            ['startsWith', 'contains', 'endsWith'].forEach(id => {
+                document.getElementById(id)?.addEventListener('input', () => performSearch(true));
+            });
+
             // View modes bindings
             document.getElementById('btn-col-view')?.addEventListener('click', () => changeListType(1));
             document.getElementById('btn-list-view')?.addEventListener('click', () => changeListType(0));
